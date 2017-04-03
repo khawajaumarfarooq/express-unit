@@ -43,13 +43,21 @@ export function run(setup, middleware, done) {
     }
   }
 
+  let middlewareNexted = false
+  const middlewareFinish = (_err = null) => {
+    if(middlewareNexted)
+      throw new ExpressUnitError('Called middleware more then once')
+    middlewareNexted = true
+    finish(_err)
+  }
+
   let promise
 
   setup(req, res, (_err = null) => {
     err = _err
     promise = middleware.length <= 3
-      ? middleware(req, res, finish)
-      : middleware(err, req, res, finish)
+      ? middleware(req, res, middlewareFinish)
+      : middleware(err, req, res, middlewareFinish)
   })
 
   if (!isPromise(promise)) return
