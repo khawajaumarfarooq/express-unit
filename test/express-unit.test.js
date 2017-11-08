@@ -119,4 +119,23 @@ describe('express-unit', () => {
     run(null, middleware, done)
   })
 
+  it('errors middleware calling next more then once (async wrap)', async () => {
+    const middleware = wrap(async (req, res, next) => { next(); next() })
+    let error
+    try { await run(null, middleware) }
+    catch (err) { error = err }
+    finally {
+      expect(error).to.be.instanceof(ExpressUnitError)
+    }
+  })
+
+  it('erros when middleware calls next more then once', async () => {
+    const middleware = (req, res, next) => { next(); next() }
+    let error
+    try { await run(null, middleware) }
+    catch (err) { error = err }
+    finally {
+      expect(error).to.be.instanceof(ExpressUnitError)
+    }
+  })
 })
